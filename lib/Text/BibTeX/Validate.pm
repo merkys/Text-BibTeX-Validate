@@ -16,9 +16,21 @@ sub validate_BibTeX
 
     if( exists $entry->{email} &&
         !defined is_email_rfc822 $entry->{email} ) {
-        warn sprintf 'email: value \'%s\' does not look like an email ' .
+        warn sprintf 'email: value \'%s\' does not look like email ' .
                      'address' . "\n",
                      $entry->{email};
+    }
+
+    if( exists $entry->{doi} ) {
+        my $doi = $entry->{doi};
+        if( $entry->{doi} =~ m|^https?://doi\.org/(10\.)| ) {
+            warn sprintf 'doi: value \'%s\' is better written as \'%s\'' . "\n",
+                         $entry->{doi},
+                         $1;
+        } elsif( $entry->{doi} !~ /^(doi:)?10\./ ) {
+            warn sprintf 'doi: value \'%s\' does not look like DOI' . "\n",
+                         $entry->{doi};
+        }
     }
 
     # Both keys are non-standard
@@ -26,7 +38,7 @@ sub validate_BibTeX
         next if !exists $entry->{$key};
         my $check = CheckDigits(uc $key);
         next if $check->is_valid $entry->{$key};
-        warn sprintf '%s: value \'%s\' does not look like an %s ' . "\n",
+        warn sprintf '%s: value \'%s\' does not look like %s ' . "\n",
                      $key,
                      $entry->{$key},
                      uc $key;
@@ -36,7 +48,7 @@ sub validate_BibTeX
     for my $key ('eprint', 'url') {
         next if !exists $entry->{$key};
         next if defined is_uri $entry->{$key};
-        warn sprintf '%s: value \'%s\' does not look like an URL' . "\n",
+        warn sprintf '%s: value \'%s\' does not look like URL' . "\n",
                      $key,
                      $entry->{$key};
     }
