@@ -3,6 +3,9 @@ package Text::BibTeX::Validate;
 use strict;
 use warnings;
 
+# ABSTRACT: validator for BibTeX format
+# VERSION
+
 use Algorithm::CheckDigits;
 use Data::Validate::Email qw( is_email_rfc822 );
 use Data::Validate::URI qw( is_uri );
