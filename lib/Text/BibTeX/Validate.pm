@@ -21,20 +21,15 @@ sub validate_BibTeX
                      $entry->{email};
     }
 
-    if( exists $entry->{isbn} ) {
-        my $isbn = CheckDigits('ISBN');
-        if( !$isbn->is_valid( $entry->{isbn} ) ) {
-            warn sprintf 'isbn: value \'%s\' does not look like an ISBN ' . "\n",
-                         $entry->{isbn};
-        }
-    }
-
-    if( exists $entry->{issn} ) {
-        my $issn = CheckDigits('ISSN');
-        if( !$isbn->is_valid( $entry->{issn} ) ) {
-            warn sprintf 'issn: value \'%s\' does not look like an ISBN ' . "\n",
-                         $entry->{issn};
-        }
+    # Both keys are non-standard
+    for my $key ('isbn', 'issn') {
+        next if !exists $entry->{$key};
+        my $check = CheckDigits(uc $key);
+        next if $check->is_valid $entry->{$key};
+        warn sprintf '%s: value \'%s\' does not look like an %s ' . "\n",
+                     $key,
+                     $entry->{$key},
+                     uc $key;
     }
 
     # Both keys are non-standard
