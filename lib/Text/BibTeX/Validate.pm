@@ -40,7 +40,7 @@ sub validate_BibTeX
     for my $key ('isbn', 'issn') {
         next if !exists $entry->{$key};
         my $check = CheckDigits(uc $key);
-        next if $check->is_valid $entry->{$key};
+        next if $check->is_valid( $entry->{$key} );
         warn sprintf '%s: value \'%s\' does not look like %s ' . "\n",
                      $key,
                      $entry->{$key},
