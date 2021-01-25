@@ -26,7 +26,7 @@ sub validate_BibTeX
 
     if( exists $entry->{doi} ) {
         my $doi = $entry->{doi};
-        if( $entry->{doi} =~ m|^https?://doi\.org/(10\.)| ) {
+        if( $entry->{doi} =~ m|^https?://doi\.org/(10\..*)$| ) {
             warn sprintf 'doi: value \'%s\' is better written as \'%s\'' . "\n",
                          $entry->{doi},
                          $1;
