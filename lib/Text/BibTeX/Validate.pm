@@ -9,10 +9,15 @@ use warnings;
 use Algorithm::CheckDigits;
 use Data::Validate::Email qw( is_email_rfc822 );
 use Data::Validate::URI qw( is_uri );
+use Scalar::Util qw(blessed);
 
 sub validate_BibTeX
 {
     my( $what ) = @_;
+
+    if( blessed $what && $what->isa( 'Text::BibTeX::Entry' ) ) {
+        $what = { map { $_ => $what->get($_) } $what->fieldlist };
+    }
 
     # TODO: check for duplicated keys
     my $entry = { map { lc $_ => $what->{$_} } keys %$what };
