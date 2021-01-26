@@ -19,8 +19,8 @@ sub validate_BibTeX
 
     if( exists $entry->{email} &&
         !defined is_email_rfc822 $entry->{email} ) {
-        warn sprintf 'email: value \'%s\' does not look like email ' .
-                     'address' . "\n",
+        warn sprintf 'email: value \'%s\' does not look like valid ' .
+                     'email address' . "\n",
                      $entry->{email};
     }
 
@@ -31,7 +31,7 @@ sub validate_BibTeX
                          $entry->{doi},
                          $1;
         } elsif( $entry->{doi} !~ m|^(doi:)?10\.[^/]+/.*| ) {
-            warn sprintf 'doi: value \'%s\' does not look like DOI' . "\n",
+            warn sprintf 'doi: value \'%s\' does not look like valid DOI' . "\n",
                          $entry->{doi};
         }
     }
@@ -40,8 +40,10 @@ sub validate_BibTeX
     for my $key ('isbn', 'issn') {
         next if !exists $entry->{$key};
         my $check = CheckDigits(uc $key);
-        next if $check->is_valid( $entry->{$key} );
-        warn sprintf '%s: value \'%s\' does not look like %s ' . "\n",
+        my $value = $entry->{$key};
+        $value =~ s/-//g;
+        next if $check->is_valid( $value );
+        warn sprintf '%s: value \'%s\' does not look like valid %s' . "\n",
                      $key,
                      $entry->{$key},
                      uc $key;
@@ -51,7 +53,7 @@ sub validate_BibTeX
     for my $key ('eprint', 'url') {
         next if !exists $entry->{$key};
         next if defined is_uri $entry->{$key};
-        warn sprintf '%s: value \'%s\' does not look like URL' . "\n",
+        warn sprintf '%s: value \'%s\' does not look like valid URL' . "\n",
                      $key,
                      $entry->{$key};
     }
