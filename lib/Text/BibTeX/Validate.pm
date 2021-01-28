@@ -47,6 +47,13 @@ sub validate_BibTeX
         }
     }
 
+    # Validated according to BibTeX recommendations
+    if( exists $entry->{month} &&
+        $entry->{month} !~ /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\.?$/i ) {
+        warn sprintf 'month: value \'%s\' does not look like valid month' . "\n",
+                     $entry->{month};
+    }
+
     if( exists $entry->{year} ) {
         # Sometimes bibliographies list the next year to show that they
         # are going to be published soon.
