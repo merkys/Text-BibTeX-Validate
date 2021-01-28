@@ -4,7 +4,7 @@ use warnings;
 use File::Temp;
 use Test::More tests => 2;
 use Text::BibTeX;
-use Text::BibTeX::Validate;
+use Text::BibTeX::Validate qw( validate_BibTeX );
 
 my $tmp = File::Temp->new();
 my $fh;
@@ -30,12 +30,12 @@ my $entry = Text::BibTeX::Entry->new( $bibfile );
 my $warning;
 local $SIG{__WARN__} = sub { $warning = $_[0] };
 
-Text::BibTeX::Validate::validate_BibTeX( $entry );
+validate_BibTeX( $entry );
 $warning =~ s/\n$// if $warning;
 is( $warning, undef );
 
 $entry->set( 'doi', 'doi/10.1107/S1600576715022396' );
-Text::BibTeX::Validate::validate_BibTeX( $entry );
+validate_BibTeX( $entry );
 $warning =~ s/\n$// if $warning;
 is( $warning,
     'doi: value \'doi/10.1107/S1600576715022396\' does not look like valid DOI' );

@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use Test::More;
-use Text::BibTeX::Validate;
+use Text::BibTeX::Validate qw( validate_BibTeX );
 
 my @cases = (
     [ { doi => 'not a DOI' },
@@ -19,7 +19,7 @@ plan tests => scalar @cases;
 for my $case (@cases) {
     my $warning;
     local $SIG{__WARN__} = sub { $warning = $_[0] };
-    Text::BibTeX::Validate::validate_BibTeX( $case->[0] );
+    validate_BibTeX( $case->[0] );
     $warning =~ s/\n$// if $warning;
     is( $warning, $case->[1] );
 }
