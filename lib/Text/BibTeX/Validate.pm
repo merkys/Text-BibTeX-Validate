@@ -57,9 +57,15 @@ sub validate_BibTeX
     # Both keys are non-standard
     for my $key ('isbn', 'issn') {
         next if !exists $entry->{$key};
-        my $check = CheckDigits(uc $key);
-        my $value = $entry->{$key};
-        next if $check->is_valid( $value );
+        my $check = CheckDigits( $key );
+        if( $key eq 'isbn' ) {
+            my $value = $entry->{$key};
+            $value =~ s/-//g;
+            if( length $value == 13 ) {
+                $check = CheckDigits( 'isbn13' );
+            }
+        }
+        next if $check->is_valid( $entry->{$key} );
         warn sprintf '%s: value \'%s\' does not look like valid %s' . "\n",
                      $key,
                      $entry->{$key},
