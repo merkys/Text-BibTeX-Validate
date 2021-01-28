@@ -41,6 +41,19 @@ sub validate_BibTeX
         }
     }
 
+    if( exists $entry->{year} ) {
+        # Sometimes bibliographies list the next year to show that they
+        # are going to be published soon.
+        my @localtime = localtime;
+        if( $entry->{year} !~ /^[0-9]{4}$/ ) {
+            warn sprintf 'year: value \'%s\' does not look like valid year' . "\n",
+                         $entry->{year};
+        } elsif( $entry->{year} > $localtime[5] + 1901 ) {
+            warn sprintf 'year: value \'%s\' is too far in the future' . "\n",
+                         $entry->{year};
+        }
+    }
+
     # Both keys are non-standard
     for my $key ('isbn', 'issn') {
         next if !exists $entry->{$key};
