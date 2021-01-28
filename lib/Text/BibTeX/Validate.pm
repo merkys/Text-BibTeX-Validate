@@ -59,7 +59,6 @@ sub validate_BibTeX
         next if !exists $entry->{$key};
         my $check = CheckDigits(uc $key);
         my $value = $entry->{$key};
-        $value =~ s/-//g;
         next if $check->is_valid( $value );
         warn sprintf '%s: value \'%s\' does not look like valid %s' . "\n",
                      $key,
