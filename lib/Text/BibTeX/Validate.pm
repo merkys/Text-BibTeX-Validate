@@ -11,6 +11,12 @@ use Data::Validate::Email qw( is_email_rfc822 );
 use Data::Validate::URI qw( is_uri );
 use Scalar::Util qw( blessed );
 
+require Exporter;
+our @ISA = qw( Exporter );
+our @EXPORT_OK = qw(
+    validate_BibTeX
+);
+
 sub validate_BibTeX
 {
     my( $what ) = @_;

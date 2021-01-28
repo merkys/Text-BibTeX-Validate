@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Text::BibTeX::Entry;
 use Text::BibTeX::File;
-use Text::BibTeX::Validate;
+use Text::BibTeX::Validate qw( validate_BibTeX );
 
 @ARGV = ( '-' ) unless @ARGV;
 
@@ -16,6 +16,6 @@ for my $filename (@ARGV) {
             warn "$0: $filename $entry->{key}: " . $_[0];
         };
 
-        Text::BibTeX::Validate::validate_BibTeX( $entry );
+        validate_BibTeX( $entry );
     }
 }
