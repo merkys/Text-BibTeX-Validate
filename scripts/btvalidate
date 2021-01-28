@@ -1,0 +1,19 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Text::BibTeX::Entry;
+use Text::BibTeX::File;
+use Text::BibTeX::Validate;
+
+for my $filename (@ARGV) {
+    my $bibfile = Text::BibTeX::File->new( $filename )
+        || die "$filename: $!\n";
+    while( my $entry = Text::BibTeX::Entry->new( $bibfile ) ) {
+        local $SIG{__WARN__} = sub {
+            warn "$0: $filename $entry->{key}: " . $_[0];
+        };
+
+        Text::BibTeX::Validate::validate_BibTeX( $entry );
+    }
+}
