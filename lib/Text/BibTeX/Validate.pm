@@ -75,6 +75,14 @@ sub validate_BibTeX
                      $key,
                      $entry->{$key};
     }
+
+    # Non-standard
+    if( exists $entry->{pmid} ) {
+        if( $entry->{pmid} !~ /^[1-9][0-9]*$/ ) {
+            warn sprintf 'pmid: value \'%s\' does not look like valid PMID' . "\n",
+                         $entry->{pmid};
+        }
+    }
 }
 
 1;
