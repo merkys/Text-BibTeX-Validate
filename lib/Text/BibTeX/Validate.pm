@@ -89,6 +89,15 @@ sub validate_BibTeX
     for my $key ('eprint', 'url') {
         next if !exists $entry->{$key};
         next if defined is_uri $entry->{$key};
+
+        if( $entry->{$key} =~ /^(.*)\n$/ && defined is_uri $1 ) {
+            # BibTeX converted from YAML (i.e., Debian::DEP12) might
+            # have trailing newline character attached.
+            warn sprintf '%s: URL has trailing newline character' . "\n",
+                         $key;
+            next;
+        }
+
         warn sprintf '%s: value \'%s\' does not look like valid URL' . "\n",
                      $key,
                      $entry->{$key};
