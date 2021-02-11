@@ -28,6 +28,13 @@ sub validate_BibTeX
     # TODO: check for duplicated keys
     my $entry = { map { lc $_ => $what->{$_} } keys %$what };
 
+    # Report and remove empty keys
+    for my $key (sort keys %$entry) {
+        next if defined $entry->{$key};
+        warn sprintf '%s: undefined value' . "\n", $key;
+        delete $entry->{$key};
+    }
+
     if( exists $entry->{email} &&
         !defined is_email_rfc822 $entry->{email} ) {
         warn sprintf 'email: value \'%s\' does not look like valid ' .
