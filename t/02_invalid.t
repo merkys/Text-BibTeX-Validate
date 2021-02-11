@@ -12,6 +12,8 @@ my @cases = (
     [ { isbn => '0-306-40615-2' }, undef ],
     [ { isbn => '0-306-40615-X' },
       'isbn: value \'0-306-40615-X\' does not look like valid ISBN' ],
+    [ { pmid => 'PMC1234567' },
+      'pmid: PMCID \'PMC1234567\' is provided instead of PMID' ],
 );
 
 plan tests => scalar @cases;

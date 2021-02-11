@@ -112,7 +112,10 @@ sub validate_BibTeX
 
     # Nonstandard
     if( exists $entry->{pmid} ) {
-        if( $entry->{pmid} !~ /^[1-9][0-9]*$/ ) {
+        if( $entry->{pmid} =~ /^PMC[0-9]{7}$/ ) {
+            warn sprintf 'pmid: PMCID \'%s\' is provided instead of PMID' . "\n",
+                         $entry->{pmid};
+        } elsif( $entry->{pmid} !~ /^[1-9][0-9]*$/ ) {
             warn sprintf 'pmid: value \'%s\' does not look like valid PMID' . "\n",
                          $entry->{pmid};
         }
