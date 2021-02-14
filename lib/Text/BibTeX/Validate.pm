@@ -14,8 +14,18 @@ use Scalar::Util qw( blessed );
 require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
+    shorten_DOI
     validate_BibTeX
 );
+
+sub shorten_DOI($)
+{
+    my( $doi ) = @_;
+
+    return $doi if $doi =~ s|^https?://(dx\.)?doi\.org/||;
+    return $doi if $doi =~ s|^doi:||;
+    return $doi;
+}
 
 sub validate_BibTeX
 {
@@ -44,13 +54,15 @@ sub validate_BibTeX
 
     if( exists $entry->{doi} ) {
         my $doi = $entry->{doi};
-        if( $entry->{doi} =~ m|^https?://doi\.org/(10\.[^/]+/.*)$| ) {
-            warn sprintf 'doi: value \'%s\' is better written as \'%s\'' . "\n",
-                         $entry->{doi},
-                         $1;
-        } elsif( $entry->{doi} !~ m|^(doi:)?10\.[^/]+/.*| ) {
+        my $doi_now = shorten_DOI $doi;
+
+        if( $doi_now !~ m|^10\.[^/]+/| ) {
             warn sprintf 'doi: value \'%s\' does not look like valid DOI' . "\n",
-                         $entry->{doi};
+                         $doi;
+        } elsif( $doi ne $doi_now ) {
+            warn sprintf 'doi: value \'%s\' is better written as \'%s\'' . "\n",
+                         $doi,
+                         $doi_now;
         }
     }
 
