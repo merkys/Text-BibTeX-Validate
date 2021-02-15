@@ -13,17 +13,17 @@ for my $filename (@ARGV) {
     my $bibfile = Text::BibTeX::File->new( $filename )
         || die "$filename: $!\n";
     while( my $entry = Text::BibTeX::Entry->new( $bibfile ) ) {
-        local $SIG{__WARN__} = sub {
-            if( blessed $_[0] &&
-                $_[0]->isa( Text::BibTeX::Validate::Warning:: ) ) {
-                $_[0]->{file} = $filename;
-                $_[0]->{key} = $entry->{key};
+        my @warnings = validate_BibTeX( $entry );
+
+        for my $warning (@warnings) {
+            if( blessed $warning &&
+                $warning->isa( Text::BibTeX::Validate::Warning:: ) ) {
+                $warning->{file} = $filename;
+                $warning->{key} = $entry->{key};
                 warn "$0: $_[0]\n";
             } else {
                 warn "$0: $filename: $entry->{key}: " . $_[0];
             }
-        };
-
-        validate_BibTeX( $entry );
+        }
     }
 }
