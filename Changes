@@ -1,3 +1,11 @@
+0.2.0 2021-02-15
+
+    - Renaming 'btvalidate' -> 'bibtex-validate'.
+    - Issuing warnings as objects.
+    - Reporting PMCIDs provided instead of PMIDs.
+    - Reporting empty fields.
+    - Reporting URLs with trailing newlines.
+
 0.1.1 2021-02-03
 
     - Adding POD.
