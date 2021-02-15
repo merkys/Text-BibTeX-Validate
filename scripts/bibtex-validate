@@ -20,9 +20,9 @@ for my $filename (@ARGV) {
                 $warning->isa( Text::BibTeX::Validate::Warning:: ) ) {
                 $warning->{file} = $filename;
                 $warning->{key} = $entry->{key};
-                warn "$0: $_[0]\n";
+                warn "$0: $warning\n";
             } else {
-                warn "$0: $filename: $entry->{key}: " . $_[0];
+                warn "$0: $filename: $entry->{key}: $warning";
             }
         }
     }
