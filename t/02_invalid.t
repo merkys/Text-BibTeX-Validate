@@ -16,12 +16,11 @@ my @cases = (
       'pmid: PMCID \'PMC1234567\' is provided instead of PMID' ],
 );
 
-plan tests => scalar @cases;
+plan tests => 2 * scalar @cases;
 
 for my $case (@cases) {
-    my $warning;
-    local $SIG{__WARN__} = sub { $warning = "$_[0]" };
-    validate_BibTeX( $case->[0] );
+    my @warnings = validate_BibTeX( $case->[0] );
 
-    is( $warning, $case->[1] );
+    is( scalar @warnings, defined $case->[1] ? 1 : 0 );
+    is( @warnings ? "$warnings[0]" : undef, $case->[1] );
 }

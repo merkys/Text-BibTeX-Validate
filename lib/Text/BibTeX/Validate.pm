@@ -39,19 +39,23 @@ sub validate_BibTeX
     # TODO: check for duplicated keys
     my $entry = { map { lc $_ => $what->{$_} } keys %$what };
 
+    my @warnings;
+
     # Report and remove empty keys
     for my $key (sort keys %$entry) {
         next if defined $entry->{$key};
-        _warn_value( 'undefined value', $entry, $key );
+        push @warnings,
+             _warn_value( 'undefined value', $entry, $key );
         delete $entry->{$key};
     }
 
     if( exists $entry->{email} &&
         !defined is_email_rfc822 $entry->{email} ) {
-        _warn_value( 'value \'%(value)s\' does not look like valid ' .
-                     'email address',
-                     $entry,
-                     'email' );
+        push @warnings,
+             _warn_value( 'value \'%(value)s\' does not look like valid ' .
+                          'email address',
+                          $entry,
+                          'email' );
     }
 
     if( exists $entry->{doi} ) {
@@ -59,23 +63,26 @@ sub validate_BibTeX
         my $doi_now = shorten_DOI $doi;
 
         if( $doi_now !~ m|^10\.[^/]+/| ) {
-            _warn_value( 'value \'%(value)s\' does not look like valid DOI',
-                         $entry,
-                         'doi' );
+            push @warnings,
+                 _warn_value( 'value \'%(value)s\' does not look like valid DOI',
+                              $entry,
+                              'doi' );
         } elsif( $doi ne $doi_now ) {
-            _warn_value( 'value \'%(value)s\' is better written as \'%(suggestion)s\'',
-                         $entry,
-                         'doi',
-                         { suggestion => $doi_now } );
+            push @warnings,
+                 _warn_value( 'value \'%(value)s\' is better written as \'%(suggestion)s\'',
+                              $entry,
+                              'doi',
+                              { suggestion => $doi_now } );
         }
     }
 
     # Validated according to BibTeX recommendations
     if( exists $entry->{month} &&
         $entry->{month} !~ /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\.?$/i ) {
-        _warn_value( 'value \'%(value)s\' does not look like valid month',
-                     $entry,
-                     'month' );
+        push @warnings,
+             _warn_value( 'value \'%(value)s\' does not look like valid month',
+                          $entry,
+                          'month' );
     }
 
     if( exists $entry->{year} ) {
@@ -83,13 +90,15 @@ sub validate_BibTeX
         # are going to be published soon.
         my @localtime = localtime;
         if( $entry->{year} !~ /^[0-9]{4}$/ ) {
-            _warn_value( 'value \'%(value)s\' does not look like valid year',
-                         $entry,
-                         'year' );
+            push @warnings,
+                 _warn_value( 'value \'%(value)s\' does not look like valid year',
+                              $entry,
+                              'year' );
         } elsif( $entry->{year} > $localtime[5] + 1901 ) {
-            _warn_value( 'value \'%(value)s\' is too far in the future',
-                         $entry,
-                         'year' );
+            push @warnings,
+                 _warn_value( 'value \'%(value)s\' is too far in the future',
+                              $entry,
+                              'year' );
         }
     }
 
@@ -105,10 +114,11 @@ sub validate_BibTeX
             }
         }
         next if $check->is_valid( $entry->{$key} );
-        _warn_value( 'value \'%(value)s\' does not look like valid %(FIELD)s',
-                     $entry,
-                     $key,
-                     { FIELD => uc $key } );
+        push @warnings,
+             _warn_value( 'value \'%(value)s\' does not look like valid %(FIELD)s',
+                          $entry,
+                          $key,
+                          { FIELD => uc $key } );
     }
 
     # Both keys are nonstandard
@@ -119,36 +129,42 @@ sub validate_BibTeX
         if( $entry->{$key} =~ /^(.*)\n$/ && defined is_uri $1 ) {
             # BibTeX converted from YAML (i.e., Debian::DEP12) might
             # have trailing newline character attached.
-            _warn_value( 'URL has trailing newline character',
-                         $entry,
-                         $key );
+            push @warnings,
+                 _warn_value( 'URL has trailing newline character',
+                              $entry,
+                              $key );
             next;
         }
 
-        _warn_value( 'value \'%(value)s\' does not look like valid URL',
-                     $entry,
-                     $key );
+        push @warnings,
+             _warn_value( 'value \'%(value)s\' does not look like valid URL',
+                          $entry,
+                          $key );
     }
 
     # Nonstandard
     if( exists $entry->{pmid} ) {
         if( $entry->{pmid} =~ /^PMC[0-9]{7}$/ ) {
-            _warn_value( 'PMCID \'%(value)s\' is provided instead of PMID',
-                         $entry,
-                         'pmid' );
+            push @warnings,
+                 _warn_value( 'PMCID \'%(value)s\' is provided instead of PMID',
+                              $entry,
+                              'pmid' );
         } elsif( $entry->{pmid} !~ /^[1-9][0-9]*$/ ) {
-            _warn_value( 'value \'%(value)s\' does not look like valid PMID',
-                         $entry,
-                         'pmid' );
+            push @warnings,
+                 _warn_value( 'value \'%(value)s\' does not look like valid PMID',
+                              $entry,
+                              'pmid' );
         }
     }
+
+    return @warnings;
 }
 
 sub _warn_value
 {
     my( $message, $entry, $field, $extra ) = @_;
     $extra = {} unless $extra;
-    warn Text::BibTeX::Validate::Warning->new(
+    return Text::BibTeX::Validate::Warning->new(
             $message,
             { field => $field,
               value => $entry->{$field},
@@ -172,7 +188,9 @@ Text::BibTeX::Validate - validator for BibTeX format
 
     my $bibfile = Text::BibTeX::File->new( 'bibliography.bib' );
     while( my $entry = Text::BibTeX::Entry->new( $bibfile ) ) {
-        validate_BibTeX( $entry );
+        for my $warning (validate_BibTeX( $entry )) {
+            print STDERR "$warning\n";
+        }
     }
 
 =head1 DESCRIPTION
@@ -182,7 +200,8 @@ their compliance with their format. In particular, value of C<email> is
 checked against RFC 822 mandated email address syntax, value of C<doi>
 is checked to start with C<10.> and contain at least one C</> and so on.
 Some nonstandard fields as C<isbn>, C<issn> and C<url> are also checked.
-Failures of checks are raised as Perl warnings.
+Failures of checks are returned as instances of
+L<Text::BibTeX::Validate::Warning|Text::BibTeX::Validate::Warning>.
 
 Subroutine C<validate_BibTeX> currently accepts plain Perl hash
 references containing BibTeX fields and their values, as well as
