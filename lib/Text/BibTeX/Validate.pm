@@ -10,6 +10,7 @@ use Algorithm::CheckDigits;
 use Data::Validate::Email qw( is_email_rfc822 );
 use Data::Validate::URI qw( is_uri );
 use Scalar::Util qw( blessed );
+use Text::BibTeX::Validate::Warning;
 
 require Exporter;
 our @ISA = qw( Exporter );
@@ -41,15 +42,16 @@ sub validate_BibTeX
     # Report and remove empty keys
     for my $key (sort keys %$entry) {
         next if defined $entry->{$key};
-        warn sprintf '%s: undefined value' . "\n", $key;
+        _warn_value( 'undefined value', $entry, $key );
         delete $entry->{$key};
     }
 
     if( exists $entry->{email} &&
         !defined is_email_rfc822 $entry->{email} ) {
-        warn sprintf 'email: value \'%s\' does not look like valid ' .
-                     'email address' . "\n",
-                     $entry->{email};
+        _warn_value( 'value \'%(value)s\' does not look like valid ' .
+                     'email address',
+                     $entry,
+                     'email' );
     }
 
     if( exists $entry->{doi} ) {
@@ -57,20 +59,23 @@ sub validate_BibTeX
         my $doi_now = shorten_DOI $doi;
 
         if( $doi_now !~ m|^10\.[^/]+/| ) {
-            warn sprintf 'doi: value \'%s\' does not look like valid DOI' . "\n",
-                         $doi;
+            _warn_value( 'value \'%(value)s\' does not look like valid DOI',
+                         $entry,
+                         'doi' );
         } elsif( $doi ne $doi_now ) {
-            warn sprintf 'doi: value \'%s\' is better written as \'%s\'' . "\n",
-                         $doi,
-                         $doi_now;
+            _warn_value( 'value \'%(value)s\' is better written as \'%(suggestion)s\'',
+                         $entry,
+                         'doi',
+                         { suggestion => $doi_now } );
         }
     }
 
     # Validated according to BibTeX recommendations
     if( exists $entry->{month} &&
         $entry->{month} !~ /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\.?$/i ) {
-        warn sprintf 'month: value \'%s\' does not look like valid month' . "\n",
-                     $entry->{month};
+        _warn_value( 'value \'%(value)s\' does not look like valid month',
+                     $entry,
+                     'month' );
     }
 
     if( exists $entry->{year} ) {
@@ -78,11 +83,13 @@ sub validate_BibTeX
         # are going to be published soon.
         my @localtime = localtime;
         if( $entry->{year} !~ /^[0-9]{4}$/ ) {
-            warn sprintf 'year: value \'%s\' does not look like valid year' . "\n",
-                         $entry->{year};
+            _warn_value( 'value \'%(value)s\' does not look like valid year',
+                         $entry,
+                         'year' );
         } elsif( $entry->{year} > $localtime[5] + 1901 ) {
-            warn sprintf 'year: value \'%s\' is too far in the future' . "\n",
-                         $entry->{year};
+            _warn_value( 'value \'%(value)s\' is too far in the future',
+                         $entry,
+                         'year' );
         }
     }
 
@@ -98,10 +105,10 @@ sub validate_BibTeX
             }
         }
         next if $check->is_valid( $entry->{$key} );
-        warn sprintf '%s: value \'%s\' does not look like valid %s' . "\n",
+        _warn_value( 'value \'%(value)s\' does not look like valid %(FIELD)s',
+                     $entry,
                      $key,
-                     $entry->{$key},
-                     uc $key;
+                     { FIELD => uc $key } );
     }
 
     # Both keys are nonstandard
@@ -112,26 +119,40 @@ sub validate_BibTeX
         if( $entry->{$key} =~ /^(.*)\n$/ && defined is_uri $1 ) {
             # BibTeX converted from YAML (i.e., Debian::DEP12) might
             # have trailing newline character attached.
-            warn sprintf '%s: URL has trailing newline character' . "\n",
-                         $key;
+            _warn_value( 'URL has trailing newline character',
+                         $entry,
+                         $key );
             next;
         }
 
-        warn sprintf '%s: value \'%s\' does not look like valid URL' . "\n",
-                     $key,
-                     $entry->{$key};
+        _warn_value( 'value \'%(value)s\' does not look like valid URL',
+                     $entry,
+                     $key );
     }
 
     # Nonstandard
     if( exists $entry->{pmid} ) {
         if( $entry->{pmid} =~ /^PMC[0-9]{7}$/ ) {
-            warn sprintf 'pmid: PMCID \'%s\' is provided instead of PMID' . "\n",
-                         $entry->{pmid};
+            _warn_value( 'PMCID \'%(value)s\' is provided instead of PMID',
+                         $entry,
+                         'pmid' );
         } elsif( $entry->{pmid} !~ /^[1-9][0-9]*$/ ) {
-            warn sprintf 'pmid: value \'%s\' does not look like valid PMID' . "\n",
-                         $entry->{pmid};
+            _warn_value( 'value \'%(value)s\' does not look like valid PMID',
+                         $entry,
+                         'pmid' );
         }
     }
+}
+
+sub _warn_value
+{
+    my( $message, $entry, $field, $extra ) = @_;
+    $extra = {} unless $extra;
+    warn Text::BibTeX::Validate::Warning->new(
+            $message,
+            { field => $field,
+              value => $entry->{$field},
+              %$extra } );
 }
 
 1;

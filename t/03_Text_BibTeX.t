@@ -33,7 +33,7 @@ close $fh;
 my $bibfile = Text::BibTeX::File->new( $tmp->filename );
 my $entry = Text::BibTeX::Entry->new( $bibfile );
 my $warning;
-local $SIG{__WARN__} = sub { $warning = $_[0] };
+local $SIG{__WARN__} = sub { $warning = "$_[0]" };
 
 validate_BibTeX( $entry );
 $warning =~ s/\n$// if $warning;

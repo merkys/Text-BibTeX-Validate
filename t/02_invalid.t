@@ -20,8 +20,8 @@ plan tests => scalar @cases;
 
 for my $case (@cases) {
     my $warning;
-    local $SIG{__WARN__} = sub { $warning = $_[0] };
+    local $SIG{__WARN__} = sub { $warning = "$_[0]" };
     validate_BibTeX( $case->[0] );
-    $warning =~ s/\n$// if $warning;
+
     is( $warning, $case->[1] );
 }
