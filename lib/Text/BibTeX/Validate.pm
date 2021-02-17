@@ -35,7 +35,46 @@ my @months = qw(
     december
 );
 
+=head1 NAME
+
+Text::BibTeX::Validate - validator for BibTeX format
+
+=head1 SYNOPSIS
+
+    use Text::BibTeX;
+    use Text::BibTeX::Validate qw( validate_BibTeX );
+
+    my $bibfile = Text::BibTeX::File->new( 'bibliography.bib' );
+    while( my $entry = Text::BibTeX::Entry->new( $bibfile ) ) {
+        for my $warning (validate_BibTeX( $entry )) {
+            print STDERR "$warning\n";
+        }
+    }
+
+=head1 DESCRIPTION
+
+Text::BibTeX::Validate checks the standard fields of BibTeX entries for
+their compliance with their format. In particular, value of C<email> is
+checked against RFC 822 mandated email address syntax, value of C<doi>
+is checked to start with C<10.> and contain at least one C</> and so on.
+Some nonstandard fields as C<isbn>, C<issn> and C<url> are also checked.
+Failures of checks are returned as instances of
+L<Text::BibTeX::Validate::Warning|Text::BibTeX::Validate::Warning>.
+
+=head1 METHODS
+
+=cut
+
 sub shorten_DOI($);
+
+=head2 validate_BibTeX( $what )
+
+Takes plain Perl hash reference containing BibTeX fields and their
+values, as well as L<Text::BibTeX::Entry|Text::BibTeX::Entry> instances
+and returns an array of validation messages as instances of
+L<Text::BibTeX::Validate::Warning|Text::BibTeX::Validate::Warning>.
+
+=cut
 
 sub validate_BibTeX
 {
@@ -177,6 +216,15 @@ sub validate_BibTeX
     return @warnings;
 }
 
+=head2 clean_BibTeX( $what )
+
+Takes the same input as C<validate_BibTeX> and attempts to reconcile
+trivial issues like dropping the resolver URL part of DOIs (see
+C<shorten_DOI> method) and converting month numbers into three-letter
+abbreviations.
+
+=cut
+
 sub clean_BibTeX
 {
     my( $what ) = @_;
@@ -196,6 +244,12 @@ sub clean_BibTeX
 
     return $entry;
 }
+
+=head2 shorten_DOI( $doi )
+
+Remove the resolver URL part, as well as C<doi:> prefixes, from DOIs.
+
+=cut
 
 sub shorten_DOI($)
 {
@@ -229,42 +283,6 @@ sub _warn_value
               %$extra } );
 }
 
-1;
-
-__END__
-
-=pod
-
-=head1 NAME
-
-Text::BibTeX::Validate - validator for BibTeX format
-
-=head1 SYNOPSIS
-
-    use Text::BibTeX;
-    use Text::BibTeX::Validate qw( validate_BibTeX );
-
-    my $bibfile = Text::BibTeX::File->new( 'bibliography.bib' );
-    while( my $entry = Text::BibTeX::Entry->new( $bibfile ) ) {
-        for my $warning (validate_BibTeX( $entry )) {
-            print STDERR "$warning\n";
-        }
-    }
-
-=head1 DESCRIPTION
-
-Text::BibTeX::Validate checks the standard fields of BibTeX entries for
-their compliance with their format. In particular, value of C<email> is
-checked against RFC 822 mandated email address syntax, value of C<doi>
-is checked to start with C<10.> and contain at least one C</> and so on.
-Some nonstandard fields as C<isbn>, C<issn> and C<url> are also checked.
-Failures of checks are returned as instances of
-L<Text::BibTeX::Validate::Warning|Text::BibTeX::Validate::Warning>.
-
-Subroutine C<validate_BibTeX> currently accepts plain Perl hash
-references containing BibTeX fields and their values, as well as
-L<Text::BibTeX::Entry|Text::BibTeX::Entry> objects.
-
 =head1 SEE ALSO
 
 perl(1)
@@ -274,3 +292,5 @@ perl(1)
 Andrius Merkys, E<lt>merkys@cpan.orgE<gt>
 
 =cut
+
+1;
