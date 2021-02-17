@@ -14,6 +14,9 @@ my @cases = (
       'isbn: value \'0-306-40615-X\' does not look like valid ISBN' ],
     [ { month => '02' },
       'month: value \'02\' is better written as \'Feb\'' ],
+    [ { month => 'August' },
+      'month: value \'August\' is better written as \'Aug\'' ],
+    [ { month => 'may' }, undef ],
     [ { pmid => 'PMC1234567' },
       'pmid: PMCID \'PMC1234567\' is provided instead of PMID' ],
 );

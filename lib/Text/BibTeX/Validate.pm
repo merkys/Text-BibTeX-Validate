@@ -99,6 +99,12 @@ sub validate_BibTeX
                               $entry,
                               'month',
                               { suggestion => ucfirst substr( $months[$entry->{month}-1], 0, 3 ) } );
+        } elsif( grep { lc $entry->{month} eq $_ && length $_ > 3 } @months ) {
+            push @warnings,
+                 _warn_value( 'value \'%(value)s\' is better written as \'%(suggestion)s\'',
+                              $entry,
+                              'month',
+                              { suggestion => ucfirst substr( $entry->{month}, 0, 3 ) } );
         } elsif( !(grep { lc $entry->{month} eq substr( $_, 0, 3 ) ||
                           lc $entry->{month} eq substr( $_, 0, 3 ) . '.' } @months) ) {
             push @warnings,
