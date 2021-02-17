@@ -8,9 +8,51 @@ use warnings;
 
 use Text::sprintfn;
 
+=head1 NAME
+
+Text::BibTeX::Validate::Warning - validaton warning class
+
+=head1 SYNOPSIS
+
+    use Text::BibTeX::Validate::Warning;
+
+    my $warning = Text::BibTeX::Validate::Warning->new(
+        'value \'%(value)s\' is better written as \'%(suggestion)s\'',
+        {
+            field => 'month',
+            value => '1',
+            suggestion => 'Jan',
+        }
+    );
+    print STDERR "$warning\n";
+
+=head1 DESCRIPTION
+
+Text::BibTeX::Validate::Warning is used to store the content of
+validation warning (as emitted by
+L<Text::BibTeX::Validate|Text::BibTeX::Validate>) in a structured way.
+Overloads are defined to stringify and to compare instances of the
+class.
+
+=head1 METHODS
+
+=cut
+
 use overload
     '""'  => \&to_string,
     'cmp' => \&_cmp;
+
+=head2 new( $message, $fields )
+
+Takes L<Text::sprintfn|Text::sprintfn>-compatible template and a hash
+with the values for replacement in the template. Three field names are
+reserved and used as prefixes for messages if defined: C<file> for the
+name of a file, C<key> for BibTeX key and C<field> for BibTeX key. Field
+C<suggestion> is also somewhat special, as
+L<Text::BibTeX::Validate|Text::BibTeX::Validate> may use its value to
+replace the original in an attempt to clean up the BibTeX entry.
+
+=cut
 
 sub new
 {
@@ -18,6 +60,12 @@ sub new
     my $self = { %$fields, message => $message };
     return bless $self, $class;
 }
+
+=head2 to_string()
+
+Return a string representing the warning.
+
+=cut
 
 sub to_string
 {
@@ -36,5 +84,15 @@ sub _cmp
     my( $a, $b, $are_swapped ) = @_;
     return "$a" cmp "$b" * ($are_swapped ? -1 : 1);
 }
+
+=head1 SEE ALSO
+
+perl(1)
+
+=head1 AUTHORS
+
+Andrius Merkys, E<lt>merkys@cpan.orgE<gt>
+
+=cut
 
 1;
