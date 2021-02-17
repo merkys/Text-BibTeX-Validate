@@ -35,14 +35,7 @@ my @months = qw(
     december
 );
 
-sub shorten_DOI($)
-{
-    my( $doi ) = @_;
-
-    return $doi if $doi =~ s|^https?://(dx\.)?doi\.org/||;
-    return $doi if $doi =~ s|^doi:||;
-    return $doi;
-}
+sub shorten_DOI($);
 
 sub validate_BibTeX
 {
@@ -202,6 +195,15 @@ sub clean_BibTeX
     }
 
     return $entry;
+}
+
+sub shorten_DOI($)
+{
+    my( $doi ) = @_;
+
+    return $doi if $doi =~ s|^https?://(dx\.)?doi\.org/||;
+    return $doi if $doi =~ s|^doi:||;
+    return $doi;
 }
 
 sub _convert
