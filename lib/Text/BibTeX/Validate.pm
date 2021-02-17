@@ -15,6 +15,7 @@ use Text::BibTeX::Validate::Warning;
 require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
+    clean_BibTeX
     shorten_DOI
     validate_BibTeX
 );
@@ -181,6 +182,26 @@ sub validate_BibTeX
     }
 
     return @warnings;
+}
+
+sub clean_BibTeX
+{
+    my( $what ) = @_;
+    my $entry = _convert( $what );
+
+    # Deleting undefined values prior to the validation
+    for (keys %$entry) {
+        delete $entry->{$_} if !defined $entry->{$_};
+    }
+
+    my @warnings = validate_BibTeX( $entry );
+    my @suggestions = grep { $_->{suggestion} } @warnings;
+
+    for my $suggestion (@suggestions) {
+        $entry->{$suggestion->{field}} = $suggestion->{suggestion};
+    }
+
+    return $entry;
 }
 
 sub _convert
