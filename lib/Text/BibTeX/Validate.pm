@@ -19,6 +19,21 @@ our @EXPORT_OK = qw(
     validate_BibTeX
 );
 
+my @months = qw(
+    january
+    february
+    march
+    april
+    may
+    june
+    july
+    august
+    september
+    october
+    november
+    december
+);
+
 sub shorten_DOI($)
 {
     my( $doi ) = @_;
@@ -77,12 +92,20 @@ sub validate_BibTeX
     }
 
     # Validated according to BibTeX recommendations
-    if( exists $entry->{month} &&
-        $entry->{month} !~ /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\.?$/i ) {
-        push @warnings,
-             _warn_value( 'value \'%(value)s\' does not look like valid month',
-                          $entry,
-                          'month' );
+    if( exists $entry->{month} ) {
+        if( $entry->{month} =~ /^0?[1-9]|1[12]$/ ) {
+            push @warnings,
+                 _warn_value( 'value \'%(value)s\' is better written as \'%(suggestion)s\'',
+                              $entry,
+                              'month',
+                              { suggestion => ucfirst substr( $months[$entry->{month}-1], 0, 3 ) } );
+        } elsif( !(grep { lc $entry->{month} eq substr( $_, 0, 3 ) ||
+                          lc $entry->{month} eq substr( $_, 0, 3 ) . '.' } @months) ) {
+            push @warnings,
+                 _warn_value( 'value \'%(value)s\' does not look like valid month',
+                              $entry,
+                              'month' );
+        }
     }
 
     if( exists $entry->{year} ) {
