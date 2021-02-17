@@ -46,13 +46,7 @@ sub shorten_DOI($)
 sub validate_BibTeX
 {
     my( $what ) = @_;
-
-    if( blessed $what && $what->isa( 'Text::BibTeX::Entry' ) ) {
-        $what = { map { $_ => $what->get($_) } $what->fieldlist };
-    }
-
-    # TODO: check for duplicated keys
-    my $entry = { map { lc $_ => $what->{$_} } keys %$what };
+    my $entry = _convert( $what );
 
     my @warnings;
 
@@ -187,6 +181,18 @@ sub validate_BibTeX
     }
 
     return @warnings;
+}
+
+sub _convert
+{
+    my( $what ) = @_;
+
+    if( blessed $what && $what->isa( 'Text::BibTeX::Entry' ) ) {
+        $what = { map { $_ => $what->get($_) } $what->fieldlist };
+    }
+
+    # TODO: check for duplicated keys
+    return { map { lc $_ => $what->{$_} } keys %$what };
 }
 
 sub _warn_value
