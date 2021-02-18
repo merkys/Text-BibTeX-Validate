@@ -284,10 +284,6 @@ sub _warn_value
               %$extra } );
 }
 
-=head1 SEE ALSO
-
-perl(1)
-
 =head1 AUTHORS
 
 Andrius Merkys, E<lt>merkys@cpan.orgE<gt>
