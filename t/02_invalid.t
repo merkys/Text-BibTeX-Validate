@@ -22,6 +22,9 @@ my @cases = (
     [ { month => 'may' }, undef ],
     [ { pmid => 'PMC1234567' },
       'pmid: PMCID \'PMC1234567\' is provided instead of PMID' ],
+    [ { url => "https://example.com\n" },
+      'url: URL has trailing newline character',
+      { url => 'https://example.com' } ],
 );
 
 plan tests => 3 * scalar @cases;

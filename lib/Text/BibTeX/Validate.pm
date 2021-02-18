@@ -188,7 +188,8 @@ sub validate_BibTeX
             push @warnings,
                  _warn_value( 'URL has trailing newline character',
                               $entry,
-                              $key );
+                              $key,
+                              { suggestion => $1 } );
             next;
         }
 
