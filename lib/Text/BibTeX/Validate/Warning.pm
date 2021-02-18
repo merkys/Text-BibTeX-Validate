@@ -47,8 +47,8 @@ use overload
 Takes L<Text::sprintfn|Text::sprintfn>-compatible template and a hash
 with the values for replacement in the template. Three field names are
 reserved and used as prefixes for messages if defined: C<file> for the
-name of a file, C<key> for BibTeX key and C<field> for BibTeX key. Field
-C<suggestion> is also somewhat special, as
+name of a file, C<key> for BibTeX key and C<field> for BibTeX field
+name. Field C<suggestion> is also somewhat special, as
 L<Text::BibTeX::Validate|Text::BibTeX::Validate> may use its value to
 replace the original in an attempt to clean up the BibTeX entry.
 
@@ -136,10 +136,6 @@ sub _cmp
     my( $a, $b, $are_swapped ) = @_;
     return "$a" cmp "$b" * ($are_swapped ? -1 : 1);
 }
-
-=head1 SEE ALSO
-
-perl(1)
 
 =head1 AUTHORS
 
