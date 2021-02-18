@@ -61,6 +61,58 @@ sub new
     return bless $self, $class;
 }
 
+=head2 fields()
+
+Returns an array of fields defined in the instance in any order.
+
+=cut
+
+sub fields
+{
+    return keys %{$_[0]};
+}
+
+=head2 get( $field )
+
+Returns value of a field.
+
+=cut
+
+sub get
+{
+    my( $self, $field ) = @_;
+    return $self->{$field};
+}
+
+=head2 set( $field, $value )
+
+Sets a new value for a field. Returns the old value.
+
+=cut
+
+sub set
+{
+    my( $self, $field, $value ) = @_;
+    ( my $old_value, $self->{$field} ) = ( $self->{$field}, $value );
+    return $old_value;
+}
+
+=head2 delete( $field )
+
+Unsets value for a field. Returns the old value.
+
+=cut
+
+sub delete
+{
+    my( $self, $field ) = @_;
+
+    my $old_value = $self->{$field};
+    delete $self->{$field};
+
+    return $old_value;
+}
+
 =head2 to_string()
 
 Return a string representing the warning.
